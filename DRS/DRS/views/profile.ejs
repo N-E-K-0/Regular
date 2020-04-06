@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta http-equiv="X-UA-Compatible" content="ie=edge">
+ <title>Profile</title>
+ <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+ <link rel="stylesheet" 
+ href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+ <script src="/brain.js"></script>
+
+ <style>
+  html{
+   padding:50px;
+  }
+ </style>
+</head>
+<body>
+<div class="container">
+  <div class="page-header text-center">
+   <h1>My Profile</h1>
+   <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+  </div>
+
+  <div class="row">
+   <div class="col-sm-12">
+    <div class="well">
+     <h3><span class="fa fa-user"></span> Welcome <%= user.username %></h3>
+
+     <p>
+      <strong>id</strong> <%= user.id %> <br>
+      <strong>username</strong> <%= user.username %> <br>
+     </p>
+    </div>
+   </div>
+  </div>
+
+    <div class="col-md-4" style="font-size: 25px">
+      <label for="symptom" >Choose a symptom: </label>
+
+      <select id="symptom" class="symptoms form-control" name="symptoms">
+        <option value="ChooseOption">Choose an Option</option>
+        <option value="ChestPain">ChestPain</option>
+        <option value="SpeechDelay">SpeechDelay</option>
+        <option value="BadBreath">BadBreath</option>
+        <option value="Rash">Rash</option>
+        <option value="EarPain">EarPain</option>
+        <option value="SevereSwelling">SevereSwelling</option>
+        <option value="BlurredVision">BlurredVision</option>
+        <option value="SuicidalTendency">SuicidalTendency</option>
+        <option value="BloodUrine">BloodUrine</option>
+      </select>
+    </div>
+    <div class="col-md-3" style="padding-top:40px">
+      <button id="submit" type="submit" class= "btn btn-success"> Search <button>
+    </div>
+
+    <input type="hidden" name="hidden" id="hidden"/>
+</div>
+
+<div class="col-md-9" style="padding:40px">
+  <h1>Recommended department is: <span id="nameTarget"></span></h1>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){ 
+    $('#submit').click(function(){ 
+      var value = $('#symptom :selected').text();
+
+    const recommender = {
+      "Cardiology" : "ChestPain",
+      "ChildDevelopment" :"SpeechDelay",
+      "Dental" :"BadBreath",
+      "Dermatology" :"Rash",
+      "ENT" : "EarPain" ,
+      "Nephrology" : "SevereSwelling",
+      "Opthalmalogy" :"BlurredVision",
+      "Psychiatry" :"SuicidalTendency" ,
+      "Urology" :"BloodUrine"
+    }
+
+    const trainingData = [];
+
+
+    for (let dept in recommender) {
+      const symptoms = recommender[dept];
+      trainingData.push({
+        input: { [symptoms] : 1},
+        output: { [dept] : 1}
+      });
+    }
+
+
+
+    const net = new brain.NeuralNetwork({ hiddenLayer : [3]});
+    const result = net.train(trainingData);
+
+    const result1 = net.run({[value] : 1});
+    let highestValue = 0.7;
+    let highestDeptName = "";
+    for(let deptName in result1){
+      if(result1[deptName] > highestValue){
+        highestvalue = result1[deptName];
+        highestDeptName = deptName;
+      }
+    }
+    
+    //alert("result highest deptName: " + highestDeptName);
+
+    document.getElementById('hidden').value = highestDeptName;
+
+    document.getElementById( 'nameTarget' ).innerHTML = document.getElementById( 'hidden' ).value;
+
+    })
+  })  
+</script>
+</body>
+</html>
